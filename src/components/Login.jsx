@@ -52,7 +52,7 @@ export function Login() {
           </div>
           <h1 className="text-4xl font-bold text-gray-900">Welcome Back</h1>
           <p className="mt-2 text-gray-600">
-            Sign in to your AI Quiz Maker account
+            Sign in to your LearnSphere account
           </p>
         </div>
 

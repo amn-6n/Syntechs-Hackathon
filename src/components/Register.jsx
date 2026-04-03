@@ -77,7 +77,7 @@ export function Register() {
             <UserPlus className="h-8 w-8 text-indigo-600" />
           </div>
           <h1 className="text-4xl font-bold text-gray-900">Create Account</h1>
-          <p className="mt-2 text-gray-600">Join AI Quiz Maker today</p>
+          <p className="mt-2 text-gray-600">Join LearnSphere today</p>
         </div>
 
         {/* Form Card */}
