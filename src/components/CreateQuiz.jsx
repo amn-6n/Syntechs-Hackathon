@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../utils/authStore";
 import { supabase } from "../utils/supabaseClient";
-import { generateQuestions } from "../utils/googleai";
+import { generateQuestions } from "../utils/gorqai";
 import { AlertCircle, FileText, Loader2 } from "lucide-react";
 
 export function CreateQuiz() {

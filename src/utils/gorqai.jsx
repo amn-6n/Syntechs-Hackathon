@@ -8,7 +8,7 @@ if (!apiKey) {
 
 const groq = new Groq({
   apiKey,
-  dangerouslyAllowBrowser: true, // ⚠️ frontend use
+  dangerouslyAllowBrowser: true,
 });
 
 export async function generateQuestions(sourceText, numQuestions) {

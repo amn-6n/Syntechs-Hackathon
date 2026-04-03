@@ -136,6 +136,9 @@ export function Dashboard() {
       setRecentQuizzes((prev) => prev.filter((q) => q.id !== quizToDelete.id));
 
       setQuizToDelete(null);
+
+      // Refresh dashboard data immediately
+      await fetchDashboardData();
     } catch (err) {
       setDeleteError("Failed to delete");
     } finally {
@@ -151,7 +154,7 @@ export function Dashboard() {
   if (loading)
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
+        <div className="flex flex-col items-center justify-center gap-4 text-center">
           <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600"></div>
           <p className="text-gray-600">Loading your dashboard...</p>
         </div>
