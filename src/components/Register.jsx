@@ -69,99 +69,157 @@ export function Register() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
-          <UserPlus className="mx-auto h-12 w-12 text-indigo-600" />
-          <h2 className="text-3xl font-bold">Create your account</h2>
+    <div className="flex min-h-screen flex-col justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-md">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <div className="mb-4 inline-block rounded-full bg-indigo-100 p-4">
+            <UserPlus className="h-8 w-8 text-indigo-600" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900">Create Account</h1>
+          <p className="mt-2 text-gray-600">Join AI Quiz Maker today</p>
         </div>
 
-        <div className="rounded-lg bg-white p-6 shadow">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Form Card */}
+        <div className="rounded-2xl bg-white p-8 shadow-xl">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Error Alert */}
             {error && (
-              <div className="rounded bg-red-100 p-2 text-red-600">{error}</div>
+              <div className="rounded-xl border-l-4 border-red-500 bg-red-50 p-4">
+                <p className="text-sm font-medium text-red-900">{error}</p>
+              </div>
             )}
 
-            <input
-              type="text"
-              placeholder="Full Name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="w-full rounded border p-2"
-              autoComplete="name"
-              required
-            />
-
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded border p-2"
-              autoComplete="email"
-              required
-            />
-
-            <div className="relative">
+            {/* Full Name Input */}
+            <div>
+              <label
+                htmlFor="name"
+                className="mb-2 block text-sm font-semibold text-gray-900"
+              >
+                Full Name
+              </label>
               <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded border p-2 pr-10"
-                autoComplete="new-password"
+                type="text"
+                id="name"
+                placeholder="John Doe"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 placeholder-gray-500 transition outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                autoComplete="name"
                 required
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute top-2 right-2 text-gray-500"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
             </div>
 
-            <div className="relative">
+            {/* Email Input */}
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-2 block text-sm font-semibold text-gray-900"
+              >
+                Email Address
+              </label>
               <input
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded border p-2 pr-10"
-                autoComplete="password"
+                type="email"
+                id="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 placeholder-gray-500 transition outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                autoComplete="email"
                 required
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute top-2 right-2 text-gray-500"
-              >
-                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
             </div>
 
+            {/* Password Input */}
+            <div>
+              <label
+                htmlFor="password"
+                className="mb-2 block text-sm font-semibold text-gray-900"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 placeholder-gray-500 transition outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute top-1/2 right-4 -translate-y-1/2 text-gray-500 transition hover:text-gray-700"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-gray-500">
+                Must include uppercase, lowercase, number, and special character
+              </p>
+            </div>
+
+            {/* Confirm Password Input */}
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="mb-2 block text-sm font-semibold text-gray-900"
+              >
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  id="confirmPassword"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 placeholder-gray-500 transition outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute top-1/2 right-4 -translate-y-1/2 text-gray-500 transition hover:text-gray-700"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className={`w-full rounded py-2 text-white ${
+              className={`w-full rounded-lg py-3 font-semibold text-white transition ${
                 loading
                   ? "cursor-not-allowed bg-indigo-400"
-                  : "bg-indigo-600 hover:bg-indigo-700"
+                  : "bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800"
               }`}
             >
               {loading ? "Creating account..." : "Create account"}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">Already have an account?</p>
-
-            <Link
-              to="/login"
-              className="mt-2 block text-indigo-600 hover:underline"
-            >
-              Sign in instead
-            </Link>
+          {/* Sign In Link */}
+          <div className="mt-8 border-t border-gray-200 pt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="font-semibold text-indigo-600 hover:text-indigo-700"
+              >
+                Sign in
+              </Link>
+            </p>
           </div>
         </div>
       </div>

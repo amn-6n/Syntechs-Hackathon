@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuthStore } from "../utils/authStore";
 import { supabase } from "../utils/supabaseClient";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, ArrowLeft, AlertCircle, Copy } from "lucide-react";
 
 export function EditQuiz() {
   const { id } = useParams();
@@ -80,53 +80,176 @@ export function EditQuiz() {
     }
   };
 
-  if (loading) return <p className="mt-10 text-center">Loading...</p>;
+  if (loading)
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600"></div>
+          <p className="text-gray-600">Loading quiz...</p>
+        </div>
+      </div>
+    );
 
   if (!quiz)
     return (
-      <div className="mt-10 text-center">
-        <p>Quiz not found</p>
-        <button onClick={() => navigate("/dashboard")}>Back</button>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="rounded-xl bg-white p-8 shadow-lg">
+          <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
+          <p className="text-lg font-semibold text-gray-900">Quiz not found</p>
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-6 py-2 text-white transition hover:bg-indigo-700"
+          >
+            <ArrowLeft size={18} />
+            Back to Dashboard
+          </button>
+        </div>
       </div>
     );
 
   return (
-    <div className="p-6">
-      <h2>Edit Quiz: {quiz.title}</h2>
-
-      {error && <p className="text-red-500">{error}</p>}
-
-      {questions.map((q, i) => (
-        <div key={q.id} className="mt-4 border p-4">
-          <input
-            value={q.question_text}
-            onChange={(e) =>
-              handleQuestionChange(i, "question_text", e.target.value)
-            }
-          />
-
-          <input
-            value={q.correct_answer}
-            onChange={(e) =>
-              handleQuestionChange(i, "correct_answer", e.target.value)
-            }
-          />
-
-          {q.options.map((opt, j) => (
-            <input
-              key={j}
-              value={opt}
-              onChange={(e) => handleOptionChange(i, j, e.target.value)}
-            />
-          ))}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl">
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="mb-4 flex items-center gap-2 text-indigo-600 transition hover:text-indigo-700"
+            >
+              <ArrowLeft size={20} />
+              <span>Back</span>
+            </button>
+            <h1 className="text-4xl font-bold text-gray-900">Edit Quiz</h1>
+            <p className="mt-1 text-lg text-gray-600">{quiz.title}</p>
+          </div>
         </div>
-      ))}
 
-      <button onClick={() => navigate("/dashboard")}>Cancel</button>
+        {/* Error Alert */}
+        {error && (
+          <div className="mb-6 rounded-xl border-l-4 border-red-500 bg-red-50 p-5">
+            <div className="flex gap-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-900">Error</h3>
+                <p className="mt-1 text-sm text-red-800">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
-      <button onClick={handleSave} disabled={saving}>
-        {saving ? "Saving..." : "Save"}
-      </button>
+        {/* Questions List */}
+        <div className="space-y-6">
+          {questions.length === 0 ? (
+            <div className="rounded-xl bg-white p-12 text-center shadow-md">
+              <AlertCircle size={48} className="mx-auto mb-4 text-gray-400" />
+              <p className="text-lg text-gray-600">No questions found</p>
+            </div>
+          ) : (
+            questions.map((q, i) => (
+              <div key={q.id} className="rounded-xl bg-white p-6 shadow-md">
+                {/* Question Number */}
+                <div className="mb-4 flex items-center justify-between">
+                  <span className="inline-block rounded-full bg-indigo-100 px-3 py-1 text-sm font-semibold text-indigo-700">
+                    Question {i + 1}
+                  </span>
+                </div>
+
+                {/* Question Text */}
+                <div className="mb-6">
+                  <label className="mb-2 block text-sm font-semibold text-gray-900">
+                    Question
+                  </label>
+                  <textarea
+                    value={q.question_text}
+                    onChange={(e) =>
+                      handleQuestionChange(i, "question_text", e.target.value)
+                    }
+                    rows={3}
+                    className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 placeholder-gray-500 transition outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    placeholder="Enter the question text..."
+                  />
+                </div>
+
+                {/* Correct Answer */}
+                <div className="mb-6">
+                  <label className="mb-2 block text-sm font-semibold text-gray-900">
+                    Correct Answer
+                  </label>
+                  <input
+                    type="text"
+                    value={q.correct_answer}
+                    onChange={(e) =>
+                      handleQuestionChange(i, "correct_answer", e.target.value)
+                    }
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 placeholder-gray-500 transition outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    placeholder="Enter the correct answer..."
+                  />
+                </div>
+
+                {/* Options */}
+                <div>
+                  <label className="mb-3 block text-sm font-semibold text-gray-900">
+                    Options
+                  </label>
+                  <div className="space-y-3">
+                    {q.options &&
+                      q.options.map((opt, j) => (
+                        <div key={j} className="flex items-center gap-3">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-sm font-medium text-gray-700">
+                            {String.fromCharCode(65 + j)}
+                          </span>
+                          <input
+                            type="text"
+                            value={opt}
+                            onChange={(e) =>
+                              handleOptionChange(i, j, e.target.value)
+                            }
+                            className="flex-1 rounded-lg border border-gray-300 px-4 py-2 placeholder-gray-500 transition outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                            placeholder={`Option ${String.fromCharCode(65 + j)}`}
+                          />
+                          {opt === q.correct_answer && (
+                            <span className="inline-block rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">
+                              ✓ Correct
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-10 flex justify-end gap-4">
+          <button
+            onClick={() => navigate("/dashboard")}
+            disabled={saving}
+            className="rounded-lg border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-3 font-medium text-white transition hover:from-indigo-700 hover:to-indigo-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                <span>Save Changes</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
