@@ -1,5 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CreateQuiz } from "./components/CreateQuiz";
+import { Login } from "./components/Login";
+import { Register } from "./components/Register";
+import { AuthLayout } from "./components/AuthLayout";
+import { Dashboard } from "./components/Dashboard";
+import { EditQuiz } from "./components/EditQuiz";
+import { TakeQuiz } from "./components/TakeQuiz";
 
 function App() {
   return (
