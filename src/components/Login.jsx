@@ -43,7 +43,7 @@ export function Login() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen flex-col justify-center bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -122,7 +122,7 @@ export function Login() {
               className={`w-full rounded-lg py-3 font-semibold text-white transition ${
                 loading
                   ? "cursor-not-allowed bg-indigo-400"
-                  : "bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800"
+                  : "bg-linear-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800"
               }`}
             >
               {loading ? "Signing in..." : "Sign in"}

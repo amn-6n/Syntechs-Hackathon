@@ -92,7 +92,7 @@ export function EditQuiz() {
 
   if (!quiz)
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
         <div className="rounded-xl bg-white p-8 shadow-lg">
           <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
           <p className="text-lg font-semibold text-gray-900">Quiz not found</p>
@@ -108,7 +108,7 @@ export function EditQuiz() {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -129,7 +129,7 @@ export function EditQuiz() {
         {error && (
           <div className="mb-6 rounded-xl border-l-4 border-red-500 bg-red-50 p-5">
             <div className="flex gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
               <div className="flex-1">
                 <h3 className="font-semibold text-red-900">Error</h3>
                 <p className="mt-1 text-sm text-red-800">{error}</p>
@@ -234,7 +234,7 @@ export function EditQuiz() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-3 font-medium text-white transition hover:from-indigo-700 hover:to-indigo-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-linear-to-r from-indigo-600 to-indigo-700 px-6 py-3 font-medium text-white transition hover:from-indigo-700 hover:to-indigo-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? (
               <>

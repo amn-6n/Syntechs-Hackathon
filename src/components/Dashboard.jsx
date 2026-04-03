@@ -159,7 +159,7 @@ export function Dashboard() {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Header */}
       <div className="border-b border-gray-200 bg-white shadow-sm">
         <div className="mx-auto max-w-6xl px-6 py-6">
@@ -240,7 +240,7 @@ export function Dashboard() {
         <div className="mb-8">
           <button
             onClick={() => navigate("/create-quiz")}
-            className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-3 text-white transition hover:from-indigo-700 hover:to-indigo-800"
+            className="flex items-center gap-2 rounded-lg bg-linear-to-r from-indigo-600 to-indigo-700 px-6 py-3 text-white transition hover:from-indigo-700 hover:to-indigo-800"
           >
             <Plus size={20} />
             <span className="font-medium">Create New Quiz</span>
