@@ -88,6 +88,7 @@ export function Register() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="w-full rounded border p-2"
+              autoComplete="name"
               required
             />
 
@@ -97,6 +98,7 @@ export function Register() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded border p-2"
+              autoComplete="email"
               required
             />
 
@@ -107,6 +109,7 @@ export function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded border p-2 pr-10"
+                autoComplete="new-password"
                 required
               />
               <button
@@ -125,6 +128,7 @@ export function Register() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full rounded border p-2 pr-10"
+                autoComplete="password"
                 required
               />
               <button
@@ -139,7 +143,11 @@ export function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded bg-indigo-600 py-2 text-white"
+              className={`w-full rounded py-2 text-white ${
+                loading
+                  ? "cursor-not-allowed bg-indigo-400"
+                  : "bg-indigo-600 hover:bg-indigo-700"
+              }`}
             >
               {loading ? "Creating account..." : "Create account"}
             </button>

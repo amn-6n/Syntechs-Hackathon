@@ -1,89 +1,75 @@
 import { create } from "zustand";
 import { supabase } from "../utils/supabaseClient";
 
-export const useAuthStore = create((set) => ({
+// Track pending requests to prevent concurrent calls
+let signInPending = false;
+let signUpPending = false;
+
+export const useAuthStore = create((set, get) => ({
   user: null,
   loading: true,
+  subscription: null,
 
   signIn: async (email, password) => {
+    if (signInPending) {
+      throw new Error("Sign in already in progress");
+    }
+
+    signInPending = true;
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-
       if (error) throw error;
-    } catch (error) {
-      // Handle invalid refresh token
-      if (
-        error.message?.includes("refresh_token") ||
-        error.code === "refresh_token_not_found"
-      ) {
-        await supabase.auth.signOut();
-      }
-      throw error;
+    } finally {
+      signInPending = false;
     }
   },
 
   signUp: async (email, password, fullName) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-      },
-    });
+    if (signUpPending) {
+      throw new Error("Sign up already in progress");
+    }
 
-    if (error) throw error;
+    signUpPending = true;
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName } },
+      });
+
+      if (error) throw error;
+      if (data?.user) set({ user: data.user });
+    } finally {
+      signUpPending = false;
+    }
   },
 
   signOut: async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    } finally {
-      set({ user: null });
-    }
+    await supabase.auth.signOut();
+    set({ user: null });
   },
 
   initialize: async () => {
-    try {
-      const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
+    set({ loading: true });
 
-      if (sessionError) {
-        console.error("Session error:", sessionError);
-        set({ user: null, loading: false });
-        return;
-      }
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-      // Set initial user
+    set({ user: session?.user || null });
+
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
       set({ user: session?.user || null });
+    });
 
-      // Listen auth changes
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === "SIGNED_IN") {
-          set({ user: session?.user || null });
-        } else if (event === "SIGNED_OUT") {
-          set({ user: null });
-        } else if (event === "TOKEN_REFRESHED") {
-          set({ user: session?.user || null });
-        }
-      });
+    set({ subscription: data.subscription, loading: false });
+  },
 
-      set({ loading: false });
-
-      // Cleanup
-      return () => {
-        subscription.unsubscribe();
-      };
-    } catch (error) {
-      console.error("Auth init error:", error);
-      set({ user: null, loading: false });
-    }
+  cleanup: () => {
+    const sub = get().subscription;
+    if (sub) sub.unsubscribe();
   },
 }));

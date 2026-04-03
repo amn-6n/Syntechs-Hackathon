@@ -65,6 +65,7 @@ export function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded border p-2"
+              autoComplete="email"
               required
             />
 
@@ -75,6 +76,7 @@ export function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded border p-2 pr-10"
+                autoComplete="current-password"
                 required
               />
 
@@ -90,7 +92,11 @@ export function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded bg-indigo-600 py-2 text-white"
+              className={`w-full rounded py-2 text-white ${
+                loading
+                  ? "cursor-not-allowed bg-indigo-400"
+                  : "bg-indigo-600 hover:bg-indigo-700"
+              }`}
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>
