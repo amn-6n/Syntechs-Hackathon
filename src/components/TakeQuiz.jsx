@@ -112,7 +112,7 @@ export function TakeQuiz() {
 
   if (loading)
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
         <div className="text-center">
           <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600"></div>
           <p className="text-gray-600">Loading quiz...</p>
@@ -122,7 +122,7 @@ export function TakeQuiz() {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
         <div className="max-w-md rounded-xl bg-white p-8 text-center shadow-lg">
           <LogIn className="mx-auto mb-4 h-12 w-12 text-indigo-600" />
           <h2 className="mb-2 text-2xl font-bold text-gray-900">
@@ -142,7 +142,7 @@ export function TakeQuiz() {
 
   if (error || !quiz) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
         <div className="max-w-md rounded-xl bg-white p-8 text-center shadow-lg">
           <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-600" />
           <h2 className="mb-2 text-2xl font-bold text-gray-900">Error</h2>
@@ -166,7 +166,7 @@ export function TakeQuiz() {
     const percentage = (correct / questions.length) * 100;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           {/* Result Header */}
           <div className="mb-10 rounded-2xl bg-white p-8 shadow-xl">
@@ -297,7 +297,7 @@ export function TakeQuiz() {
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="mb-8">
@@ -323,7 +323,7 @@ export function TakeQuiz() {
           </div>
           <div className="h-3 w-full rounded-full bg-gray-200">
             <div
-              className="h-3 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 transition-all duration-300"
+              className="h-3 rounded-full bg-linear-to-r from-indigo-600 to-indigo-700 transition-all duration-300"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
@@ -390,7 +390,7 @@ export function TakeQuiz() {
             <button
               onClick={handleNext}
               disabled={!selectedAnswers[currentQuestion] || submitting}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-3 font-medium text-white transition hover:from-indigo-700 hover:to-indigo-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-linear-to-r from-indigo-600 to-indigo-700 px-6 py-3 font-medium text-white transition hover:from-indigo-700 hover:to-indigo-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? (
                 <>

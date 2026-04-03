@@ -10,7 +10,7 @@ const genAI = new GoogleGenerativeAI(apiKey);
 
 export async function generateQuestions(sourceText, numQuestions) {
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
+    model: "gemini-2.0-flash",
   });
 
   // Validate inputs
@@ -28,48 +28,75 @@ export async function generateQuestions(sourceText, numQuestions) {
     throw new Error("Number of questions must be between 1 and 50");
   }
 
-  const prompt = `You are a quiz generator. Create exactly ${numQuestions} multiple choice questions based on the following text.
+  const prompt = `You are an expert quiz generator. Create exactly ${numQuestions} multiple choice questions based on the following text.
 
 Rules:
 - Each question must have exactly 4 options
 - One correct answer
-- Options must be unique and different from each other
+- Options must be unique and different
 - Shuffle options randomly (do NOT put correct answer first)
-- Make questions clear and concise
+- Make questions clear, concise, and educational
+- Questions should test understanding, not just memorization
 
-Return ONLY valid JSON in this exact format:
+Return ONLY valid JSON in this exact format (no markdown, no extra text):
 {
   "questions": [
     {
-      "question_text": "Question here?",
-      "correct_answer": "The correct answer",
+      "question_text": "What is the question?",
+      "correct_answer": "The correct option text",
       "options": ["Option 1", "Option 2", "Option 3", "Option 4"]
     }
   ]
 }
 
-Text:
+Source Material:
 ${sourceText}`;
 
   try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    // Use streaming for better performance
+    const response = await model.generateContentStream({
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: prompt,
+            },
+          ],
+        },
+      ],
+    });
 
-    // Extract JSON safely
-    const jsonStart = text.indexOf("{");
-    const jsonEnd = text.lastIndexOf("}") + 1;
+    let fullText = "";
 
-    if (jsonStart === -1 || jsonEnd === 0) {
-      throw new Error("No JSON found in AI response");
+    // Collect all streamed chunks
+    for await (const chunk of response.stream) {
+      if (chunk.text) {
+        fullText += chunk.text;
+      }
     }
 
-    const jsonString = text.slice(jsonStart, jsonEnd);
+    if (!fullText) {
+      throw new Error("Empty response from AI model");
+    }
+
+    // Extract JSON from response
+    const jsonStart = fullText.indexOf("{");
+    const jsonEnd = fullText.lastIndexOf("}") + 1;
+
+    if (jsonStart === -1 || jsonEnd === 0) {
+      console.error("AI Response:", fullText);
+      throw new Error("No valid JSON found in AI response");
+    }
+
+    const jsonString = fullText.slice(jsonStart, jsonEnd);
 
     let parsed;
     try {
       parsed = JSON.parse(jsonString);
     } catch (err) {
       console.error("JSON parse error:", err);
+      console.error("Attempted to parse:", jsonString);
       throw new Error("Invalid JSON format from AI response");
     }
 
@@ -107,19 +134,24 @@ ${sourceText}`;
         );
       }
 
-      // Ensure all options are strings
+      // Ensure all options are strings and trim whitespace
       const cleanOptions = q.options.map((opt) => String(opt).trim());
       const cleanCorrectAnswer = String(q.correct_answer).trim();
 
       // Check if correct answer exists in options
-      if (!cleanOptions.includes(cleanCorrectAnswer)) {
+      const normalizedOptions = cleanOptions.map((opt) =>
+        opt.toLowerCase().trim(),
+      );
+      const normalizedCorrect = cleanCorrectAnswer.toLowerCase().trim();
+
+      if (!normalizedOptions.includes(normalizedCorrect)) {
         throw new Error(
           `Question ${index + 1}: Correct answer not found in options`,
         );
       }
 
       // Check for duplicate options
-      const uniqueOptions = new Set(cleanOptions);
+      const uniqueOptions = new Set(normalizedOptions);
       if (uniqueOptions.size !== 4) {
         throw new Error(
           `Question ${index + 1}: Options must be unique (found duplicates)`,
@@ -145,8 +177,18 @@ ${sourceText}`;
     console.error("Question generation error:", error);
 
     // Provide more helpful error messages
-    if (error.message.includes("API")) {
-      throw new Error("Google AI API error. Please check your API key.");
+    if (error.message.includes("API_KEY")) {
+      throw new Error("Invalid or missing Google AI API key");
+    }
+
+    if (error.message.includes("429")) {
+      throw new Error(
+        "Rate limit exceeded. Please wait a moment and try again.",
+      );
+    }
+
+    if (error.message.includes("503")) {
+      throw new Error("AI service temporarily unavailable. Please try again.");
     }
 
     throw new Error(
