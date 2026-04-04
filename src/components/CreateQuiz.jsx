@@ -10,15 +10,34 @@ export function CreateQuiz() {
   const { user } = useAuthStore();
   const [title, setTitle] = useState("");
   const [numQuestions, setNumQuestions] = useState(5);
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState(10);
   const [sourceText, setSourceText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const isMissingTimeLimitColumnError = (message) => {
+    if (!message) return false;
+    const text = message.toLowerCase();
+    return (
+      text.includes("time_limit_minutes") &&
+      text.includes("could not find") &&
+      text.includes("schema cache")
+    );
+  };
 
   const handleNumQuestionsChange = (e) => {
     const value = parseInt(e.target.value, 10);
     if (!isNaN(value) && value >= 1 && value <= 50) {
       setNumQuestions(value);
     }
+  };
+
+  const handleTimeLimitChange = (e) => {
+    const value = Number(e.target.value);
+    if (!Number.isFinite(value)) return;
+
+    const clampedValue = Math.min(180, Math.max(1, value));
+    setTimeLimitMinutes(clampedValue);
   };
 
   const handleSubmit = async (e) => {
@@ -37,17 +56,39 @@ export function CreateQuiz() {
         return;
       }
 
-      // Create the quiz
-      const { data: quiz, error: quizError } = await supabase
+      // Create the quiz. If the DB schema is not yet migrated, retry without time_limit_minutes.
+      const baseQuizPayload = {
+        title,
+        user_id: user?.id,
+        source_text: sourceText,
+        num_questions: numQuestions,
+      };
+
+      let quiz;
+      let quizError;
+
+      ({ data: quiz, error: quizError } = await supabase
         .from("quizzes")
         .insert({
-          title,
-          user_id: user?.id,
-          source_text: sourceText,
-          num_questions: numQuestions,
+          ...baseQuizPayload,
+          time_limit_minutes: timeLimitMinutes,
         })
         .select()
-        .single();
+        .single());
+
+      if (quizError && isMissingTimeLimitColumnError(quizError.message)) {
+        ({ data: quiz, error: quizError } = await supabase
+          .from("quizzes")
+          .insert(baseQuizPayload)
+          .select()
+          .single());
+
+        if (!quizError) {
+          setError(
+            "Quiz created, but timer is disabled until your database migration is applied.",
+          );
+        }
+      }
 
       if (quizError) throw quizError;
       if (!quiz) throw new Error("Failed to create quiz");
@@ -158,6 +199,38 @@ export function CreateQuiz() {
                       {numQuestions === 1 ? "question" : "questions"}
                     </span>
                     <span className="text-sm text-gray-500">50 questions</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Time Limit Slider */}
+              <div>
+                <label
+                  htmlFor="timeLimit"
+                  className="mb-2 block text-sm font-semibold text-gray-900"
+                >
+                  Quiz Time Limit
+                </label>
+                <div className="space-y-4">
+                  <input
+                    type="range"
+                    id="timeLimit"
+                    min="1"
+                    max="180"
+                    step="1"
+                    value={timeLimitMinutes}
+                    onInput={handleTimeLimitChange}
+                    onChange={handleTimeLimitChange}
+                    className="h-3 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-indigo-600 disabled:opacity-50"
+                    disabled={loading}
+                  />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">1 min</span>
+                    <span className="rounded-lg bg-indigo-100 px-3 py-1 font-semibold text-indigo-700">
+                      {timeLimitMinutes}{" "}
+                      {timeLimitMinutes === 1 ? "minute" : "minutes"}
+                    </span>
+                    <span className="text-sm text-gray-500">180 min</span>
                   </div>
                 </div>
               </div>

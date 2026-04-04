@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuthStore } from "../utils/authStore";
 import { supabase } from "../utils/supabaseClient";
@@ -8,9 +8,9 @@ import {
   Loader2,
   XCircle,
   LogIn,
-  Pencil,
   ArrowLeft,
   Home,
+  Clock3,
 } from "lucide-react";
 
 export function TakeQuiz() {
@@ -27,10 +27,14 @@ export function TakeQuiz() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(null);
+  const [didAutoSubmit, setDidAutoSubmit] = useState(false);
+  const hasSubmittedRef = useRef(false);
+  const didTriggerAutoSubmitRef = useRef(false);
 
   useEffect(() => {
     async function fetchQuiz() {
-      if (!id || !user) {
+      if (!id || !user?.id) {
         setError("Invalid access");
         setLoading(false);
         return;
@@ -46,6 +50,9 @@ export function TakeQuiz() {
         if (!quizData) throw new Error("Quiz not found");
 
         setQuiz(quizData);
+        if (quizData.time_limit_minutes && quizData.time_limit_minutes > 0) {
+          setTimeRemaining(quizData.time_limit_minutes * 60);
+        }
 
         const { data: questionData } = await supabase
           .from("questions")
@@ -66,7 +73,41 @@ export function TakeQuiz() {
     }
 
     fetchQuiz();
-  }, [id, user]);
+  }, [id, user?.id]);
+
+  useEffect(() => {
+    if (loading || showResults || submitting || timeRemaining === null) {
+      return;
+    }
+
+    const timerId = window.setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev === null) return prev;
+        return prev > 0 ? prev - 1 : 0;
+      });
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timerId);
+    };
+  }, [loading, showResults, submitting, timeRemaining]);
+
+  useEffect(() => {
+    if (
+      loading ||
+      showResults ||
+      submitting ||
+      questions.length === 0 ||
+      timeRemaining !== 0 ||
+      didTriggerAutoSubmitRef.current
+    ) {
+      return;
+    }
+
+    didTriggerAutoSubmitRef.current = true;
+    setDidAutoSubmit(true);
+    calculateScore(true);
+  }, [loading, showResults, submitting, questions.length, timeRemaining]);
 
   const handleAnswerSelect = (answer) => {
     if (submitting) return;
@@ -84,7 +125,11 @@ export function TakeQuiz() {
     }
   };
 
-  const calculateScore = async () => {
+  const calculateScore = async (isAutoSubmit = false) => {
+    if (hasSubmittedRef.current) return;
+    if (!questions.length) return;
+
+    hasSubmittedRef.current = true;
     setSubmitting(true);
 
     try {
@@ -94,20 +139,39 @@ export function TakeQuiz() {
 
       const finalScore = (correct / questions.length) * 100;
 
-      await supabase.from("quiz_attempts").insert({
-        quiz_id: id,
-        user_id: user.id,
-        score: finalScore,
-        answers: selectedAnswers,
-      });
+      const { error: insertError } = await supabase
+        .from("quiz_attempts")
+        .insert({
+          quiz_id: id,
+          user_id: user.id,
+          score: finalScore,
+          answers: selectedAnswers,
+        });
+
+      if (insertError) {
+        throw insertError;
+      }
 
       setScore(finalScore);
       setShowResults(true);
+      if (isAutoSubmit) {
+        setDidAutoSubmit(true);
+      }
     } catch (err) {
       setError("Failed to save result");
+      hasSubmittedRef.current = false;
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const formatTime = (seconds) => {
+    if (seconds === null) return "No limit";
+    const mins = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const secs = (seconds % 60).toString().padStart(2, "0");
+    return `${mins}:${secs}`;
   };
 
   if (loading)
@@ -191,6 +255,11 @@ export function TakeQuiz() {
               <p className="mt-2 text-lg text-gray-600">
                 {correct} out of {questions.length} correct
               </p>
+              {didAutoSubmit && (
+                <p className="mt-3 text-sm font-semibold text-orange-600">
+                  Time ended and your quiz was auto-submitted.
+                </p>
+              )}
 
               {percentage >= 80 && (
                 <p className="mt-4 font-semibold text-green-600">
@@ -282,6 +351,12 @@ export function TakeQuiz() {
                 setCurrentQuestion(0);
                 setSelectedAnswers(new Array(questions.length).fill(""));
                 setShowResults(false);
+                setDidAutoSubmit(false);
+                hasSubmittedRef.current = false;
+                didTriggerAutoSubmitRef.current = false;
+                if (quiz?.time_limit_minutes && quiz.time_limit_minutes > 0) {
+                  setTimeRemaining(quiz.time_limit_minutes * 60);
+                }
               }}
               className="flex-1 rounded-lg bg-indigo-600 px-6 py-3 font-medium text-white transition hover:bg-indigo-700"
             >
@@ -313,13 +388,25 @@ export function TakeQuiz() {
 
         {/* Progress Bar */}
         <div className="mb-8 rounded-xl bg-white p-6 shadow-md">
-          <div className="mb-3 flex justify-between">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <span className="text-sm font-semibold text-gray-700">
               Question {currentQuestion + 1} of {questions.length}
             </span>
-            <span className="text-sm font-semibold text-indigo-600">
-              {progress.toFixed(0)}%
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-semibold text-indigo-600">
+                {progress.toFixed(0)}%
+              </span>
+              <div
+                className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${
+                  timeRemaining !== null && timeRemaining <= 30
+                    ? "bg-red-100 text-red-700"
+                    : "bg-indigo-100 text-indigo-700"
+                }`}
+              >
+                <Clock3 size={14} />
+                <span>{formatTime(timeRemaining)}</span>
+              </div>
+            </div>
           </div>
           <div className="h-3 w-full rounded-full bg-gray-200">
             <div
