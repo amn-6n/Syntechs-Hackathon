@@ -8,6 +8,12 @@ LearnSphere is an intelligent, gamified learning platform designed to help stude
 
 ---
 
+## 🚀 Live Demo
+
+**Try LearnSphere now:** [https://syntechs-hackathon.onrender.com](https://syntechs-hackathon.onrender.com)
+
+---
+
 ## 🎯 How It Works
 
 ### For Students:
